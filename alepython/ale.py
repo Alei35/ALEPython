@@ -5,6 +5,7 @@ import scipy
 
 from matplotlib import gridspec
 
+
 def _ax_title(ax, title, subtitle):
 	"""
 	Prints title on figure.
@@ -19,7 +20,8 @@ def _ax_title(ax, title, subtitle):
 		Sub-title for figure.
 	"""
 	ax.set_title(title + "\n" + subtitle)
-	#fig.suptitle(subtitle, fontsize=10, color="#919191")
+	# fig.suptitle(subtitle, fontsize=10, color="#919191")
+
 
 def _ax_labels(ax, xlabel, ylabel):
 	"""
@@ -36,7 +38,7 @@ def _ax_labels(ax, xlabel, ylabel):
 	"""
 	ax.set_xlabel(xlabel)
 	ax.set_ylabel(ylabel)
-	
+
 
 def _ax_quantiles(ax, quantiles, twin='x'):
 	"""
@@ -55,53 +57,61 @@ def _ax_quantiles(ax, quantiles, twin='x'):
 	if twin == 'x':
 		ax_top = ax.twiny()
 		ax_top.set_xticks(quantiles)
-		ax_top.set_xticklabels(["{1:0.{0}f}%".format(int(i / (len(quantiles) - 1) * 100 % 1 > 0), i / (len(quantiles) - 1) * 100) for i in range(len(quantiles))], color="#545454", fontsize=7)
+		ax_top.set_xticklabels(["{1:0.{0}f}%".format(int(i / (len(quantiles) - 1) * 100 % 1 > 0), i / (
+			len(quantiles) - 1) * 100) for i in range(len(quantiles))], color="#545454", fontsize=7)
 		ax_top.set_xlim(ax.get_xlim())
-	elif twin =='y':
+	elif twin == 'y':
 		ax_right = ax.twinx()
 		ax_right.set_yticks(quantiles)
-		ax_right.set_yticklabels(["{1:0.{0}f}%".format(int(i / (len(quantiles) - 1) * 100 % 1 > 0), i / (len(quantiles) - 1) * 100) for i in range(len(quantiles))], color="#545454", fontsize=7)
+		ax_right.set_yticklabels(["{1:0.{0}f}%".format(int(i / (len(quantiles) - 1) * 100 % 1 > 0), i / (
+			len(quantiles) - 1) * 100) for i in range(len(quantiles))], color="#545454", fontsize=7)
 		ax_right.set_ylim(ax.get_ylim())
+
 
 def _ax_scatter(ax, points):
 	print(points)
-	ax.scatter(points.values[:,0], points.values[:,1], alpha=0.5, edgecolor=None)
+	ax.scatter(points.values[:, 0], points.values[:, 1],
+			   alpha=0.5, edgecolor=None)
+
 
 def _ax_grid(ax, status):
-	ax.grid(status, linestyle='-', alpha=0.4) 
+	ax.grid(status, linestyle='-', alpha=0.4)
 
-#def _ax_labels(ax, label):
+# def _ax_labels(ax, label):
 
 
 def _ax_boxplot(ax, ALE, cat, **kwargs):
 	ax.boxplot(cat, ALE, **kwargs)
+
 
 def _ax_hist(ax, x, **kwargs):
 	sns.rugplot(x, ax=ax, alpha=0.2)
 
 
 def _first_order_quant_plot(ax, quantiles, ALE, **kwargs):
-	#ax.plot(quantiles, ALE, **kwargs)
+	# ax.plot(quantiles, ALE, **kwargs)
 	ax.plot((quantiles[1:] + quantiles[:-1]) / 2, ALE, **kwargs)
-	#ax.scatter(quantiles, ALE, color="#1f77b4", s=12)
+	# ax.scatter(quantiles, ALE, color="#1f77b4", s=12)
 
-#def _first_order_cat_plot(ax, ALE, **kwargs):
+# def _first_order_cat_plot(ax, ALE, **kwargs):
 #	"""
 #
 #	"""
 #	ax.boxplot(
+
 
 def _second_order_quant_plot(ax, quantiles, ALE, **kwargs):
 	print(ALE)
 	x = np.linspace(quantiles[0][0], quantiles[0][-1], 50)
 	y = np.linspace(quantiles[1][0], quantiles[1][-1], 50)
 	X, Y = np.meshgrid(x, y)
-	#ax.imshow(ALE, interpolation="bilinear", cmap='viridis')
+	# ax.imshow(ALE, interpolation="bilinear", cmap='viridis')
 	ALE_interp = scipy.interpolate.interp2d(quantiles[0], quantiles[1], ALE)
 	CF = ax.contourf(X, Y, ALE_interp(x, y), cmap='bwr', levels=30, alpha=0.7)
 	plt.colorbar(CF)
-	#CS = ax.contour(X, Y, ALE_interp(x, y), levels=30, cmap='inferno', alpha=0.99)
-	#ax.clabel(CS, inline=1, fontsize=10)
+	# CS = ax.contour(X, Y, ALE_interp(x, y), levels=30, cmap='inferno', alpha=0.99)
+	# ax.clabel(CS, inline=1, fontsize=10)
+
 
 def _first_order_ale_quant(predictor, train_set, feature, quantiles):
 	"""Computes first-order ALE function on single continuous feature data.
@@ -120,7 +130,8 @@ def _first_order_ale_quant(predictor, train_set, feature, quantiles):
 	ALE = np.zeros(len(quantiles) - 1)  # Final ALE function
 
 	for i in range(1, len(quantiles)):
-		subset = train_set[(quantiles[i - 1] <= train_set[feature]) & (train_set[feature] < quantiles[i])]
+		subset = train_set[(quantiles[i - 1] <= train_set[feature])
+							& (train_set[feature] < quantiles[i])]
 
 		# Without any observation, local effect on splitted area is null
 		if len(subset) != 0:
@@ -131,15 +142,16 @@ def _first_order_ale_quant(predictor, train_set, feature, quantiles):
 			z_up[feature] = quantiles[i]
 			ALE[i - 1] += (predictor(z_up) - predictor(z_low)).sum() / subset.shape[0]
 
-	
 	ALE = ALE.cumsum()  # The accumulated effect
-	ALE -= ALE.mean()  # Now we have to center ALE function in order to obtain null expectation for ALE function
+	# Now we have to center ALE function in order to obtain null expectation for ALE function
+	ALE -= ALE.mean()
 	return ALE
+
 
 def _second_order_ale_quant(predictor, train_set, features, quantiles):
 	"""Computes second-order ALE function on two continuous features data.
 
-	
+
 
 	"""
 	quantiles = np.asarray(quantiles)
@@ -149,10 +161,10 @@ def _second_order_ale_quant(predictor, train_set, features, quantiles):
 	for i in range(1, len(quantiles[0])):
 		for j in range(1, len(quantiles[1])):
 			# Select subset of training data that falls within subset
-            subset = train_set[(quantiles[0,i-1] <= train_set[features[0]]) &
-                               (quantiles[0,i] > train_set[features[0]]) &
-                               (quantiles[1,j-1] <= train_set[features[1]]) &
-                               (quantiles[1,j] > train_set[features[1]])]
+			subset = train_set[(quantiles[0,i-1] <= train_set[features[0]]) &
+							   (quantiles[0,i] > train_set[features[0]]) &
+							   (quantiles[1,j-1] <= train_set[features[1]]) &
+							   (quantiles[1,j] > train_set[features[1]])]
 
 			# Without any observation, local effect on splitted area is null
 			if len(subset) != 0:
@@ -271,7 +283,7 @@ def ale_plot(model, train_set, features, bins=10, monte_carlo=False, predictor=N
 
 		if features_classes is None:
 			ALE = _second_order_ale_quant(model.predict if predictor is None else predictor, train_set, features, quantiles)
-			#_ax_scatter(fig.gca(), train_set.loc[:, features])
+			# _ax_scatter(fig.gca(), train_set.loc[:, features])
 			_second_order_quant_plot(fig.gca(), quantiles, ALE)
 			_ax_labels(fig.gca(), "Feature '{}'".format(features[0]), "Feature '{}'".format(features[1]))
 			_ax_quantiles(fig.gca(), quantiles[0], twin='x')
